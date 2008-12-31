@@ -37,6 +37,9 @@ get_blacklist:
         - rss_absolute
         - rss
         - soundclip
+        # Old skool stuff
+        - deletion
+        - flag
 
     # get__filename:
     # 
@@ -213,6 +216,14 @@ get_blacklist:
         - video_type_display
         - weather_forecast
         - zones_with_alerts
+        # Django stuff
+        - next_in_order
+        - previous_in_order
+        # Old skool stuff
+        - deletion_url
+        - flag_url
+        - good_karma_total
+        - karma_total
 
 possible_conflicts:
     # TODO: These are properties that match the list above.
