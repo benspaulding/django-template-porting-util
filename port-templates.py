@@ -12,6 +12,9 @@ re-run. Remember that you can also point to a specific directory, like a
 specific directory within your template directory.
 
 """
+# Note that __future__ imports must go at the top.
+from __future__ import with_statement
+
 __author__ = "Ben Spaulding"
 __contributors__ = ["Christian Metts", "Travis Cline"]
 __copyright__ = "(c) 2008 Ben Spaulding. GNU GPL 3."
@@ -57,27 +60,38 @@ class TemplateMonkey:
 
 
         """
-        template_list = self.create_template_list()
+        template_paths = self.create_template_paths()
 
         config_dict = self.generate_dicts()
 
-        # Now call each method on the list of templates, as needed.
-        if self.options.add_extension:
-            self.add_extension(template_list)
+        for template_path in template_paths:
+            # Using “with” statements with file objcts is good practice, per
+            # http://docs.python.org/tutorial/inputoutput.html
+            # Note that “with” statements had to be enabled in Python 2.5. See
+            # http://docs.python.org/whatsnew/2.5.html#pep-343-the-with-statement
+            with open(template_path, 'r+') as template:
+                for line in template:
+                    # Now call each method on every line of the template, as needed.
+                    # Do I need to flush anywhere for this to work?
+                    if self.options.add_extension:
+                        self.add_extension(line)
+                    if self.options.update_file_fields:
+                        self.update_file_fields(line)
+                    if self.options.update_relations:
+                        self.update_relations(line)
+                # TODO: Here (I believe) is where I need to write each line
+                #       back to the template file.
+            template.write(template)
+            template.close()
 
-        if self.options.update_file_fields:
-            self.update_file_fields(template_list)
-
-        if self.options.update_relations:
-            self.update_relations(template_list)
-
-        if not self.options.add_extension and \
-           not self.options.update_file_fields and \
-           not self.options.update_relations:
-            print u"This monkey won’t do anything unless you tell it to — see available options by running “port-templates.py --help”"
+            if not self.options.add_extension and \
+               not self.options.update_file_fields and \
+               not self.options.update_relations:
+                print u"This monkey won’t do anything unless you tell it to — see available options by running “port-templates.py --help”"
+                sys.exit()
 
 
-    def create_template_list(self):
+    def create_template_paths(self):
         """
         Generate a complete list of templates to be worked on.
 
@@ -89,7 +103,7 @@ class TemplateMonkey:
            DJANGO_SETTINGS_MODULE environment variable).
 
         """
-        template_list = []
+        template_paths = []
 
         for path in self.options.template_paths or self.settings.TEMPLATE_DIRS:
             # Generally directories will be given to us.
@@ -98,17 +112,20 @@ class TemplateMonkey:
                     # TODO: exlclude .* directories.
                     for filename in filenames:
                         if not filename.startswith("."):
-                            template_list.append(os.path.join(dirpath, filename))
+                            template_paths.append(os.path.join(dirpath, filename))
 
             # But occasionally someone might hand us a single template file.
             elif os.path.isfile(path):
-                template_list.append(path)
+                template_paths.append(path)
 
         # import pprint
         # pp = pprint.PrettyPrinter(indent=4)
-        # print pp.pprint(template_list)
-        # print u"I created the template list!"
-        return template_list
+        # print pp.pprint(template_paths)
+        # print u"I created the template paths list!"
+        if not template_paths:
+            print u"You either failed to provide any template paths (via settings.TEMPLATE_DIRS or the --template-path option), or those you specified do not exist."
+            sys.exit()
+        return template_paths
             
 
     def generate_dicts(self):
@@ -132,7 +149,7 @@ class TemplateMonkey:
         #         print "  m  %s" % func_name
 
 
-    def add_extension(self, template):
+    def add_extension(self, line):
         """
         Adds .html extension to all template references.
 
@@ -151,17 +168,20 @@ class TemplateMonkey:
         listed in config.yml will be skipped.
 
         """
-        print u"I added the extension!"
+        # Use regex fu on the line.
+        return line
 
 
-    def update_file_fields(self, template):
+    def update_file_fields(self, line):
         """Fix syntax for accessing file field data"""
-        print u"I updated file fields!"
+        # Use regex fu on the line.
+        return line
 
 
-    def update_relations(self, template):
+    def update_relations(self, line):
         """Fix references to related objects"""
-        print u"I updated relations!"
+        # Use regex fu on the line.
+        return line
 
 
 if __name__ == "__main__":
