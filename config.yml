@@ -1,0 +1,25 @@
+extensions:
+    - css
+    - html
+    - js
+    - json
+    - txt
+    - xml
+    - yml
+    - yaml
+
+methods:
+    # Django methods
+    - get_next_in_order
+    - get_previous_in_order
+    # Old skool comments methods
+    - get_deletion_url
+    - get_flag_url
+    - get_good_karma_total
+    - get_karma_total
+
+properties:
+    force_to_property:
+        - authors
+    leave_as_method:
+        
