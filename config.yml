@@ -37,9 +37,13 @@ relations:
           # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-absolute-url
         - get_absolute_url
           # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-foo-display
-          # TODO: Need to special case ``get_foo_display`` somehow, as ``foo`` is dynamic.
+          # TODO: Need to special case these three foo ones somehow, as ``foo`` is dynamic.
         - get_foo_display
           # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-next-by-foo-kwargs-and-get-previous-by-foo-kwargs
+          # TODO: Decide — maybe the foo just needs left of these ones?
+        - get_next_by_foo
+        - get_previous_by_foo
+        # TODO: I got confused. Check that I actually need these two.
         - get_next_in_order
         - get_previous_in_order
         # Old skool comments methods. Leave these alone just to be tidy.
