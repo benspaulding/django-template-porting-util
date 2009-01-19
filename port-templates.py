@@ -38,7 +38,6 @@ except ImportError:
 class TemplateMonkey:
 
     def __init__(self, options, args):
-        # pass
         self.options = options
         self.args = args
         try:
@@ -60,6 +59,14 @@ class TemplateMonkey:
 
 
         """
+        if not self.options.add_extension and \
+           not self.options.update_file_fields and \
+           not self.options.update_relations:
+            print u"This monkey won’t do anything unless you tell it to — see available options by running “port-templates.py --help”"
+            sys.exit()
+
+        import pdb; pdb.set_trace()
+
         template_paths = self.create_template_paths()
 
         config_dict = self.generate_dicts()
@@ -80,15 +87,9 @@ class TemplateMonkey:
                     if self.options.update_relations:
                         self.update_relations(line)
                 # TODO: Here (I believe) is where I need to write each line
-                #       back to the template file.
-            template.write(template)
-            template.close()
-
-            if not self.options.add_extension and \
-               not self.options.update_file_fields and \
-               not self.options.update_relations:
-                print u"This monkey won’t do anything unless you tell it to — see available options by running “port-templates.py --help”"
-                sys.exit()
+                #       back to the template file. How?
+                template.write(template)
+                template.close()
 
 
     def create_template_paths(self):
@@ -169,17 +170,53 @@ class TemplateMonkey:
 
         """
         # Use regex fu on the line.
-        return line
+        return u"This is foo."
 
 
     def update_file_fields(self, line):
-        """Fix syntax for accessing file field data"""
+        """
+        Fix syntax for accessing file field data.
+
+        ================  ============
+        Old syntax…       Becomes…
+        ----------------  ------------
+        get_foo_url       foo.url
+        get_foo_size      foo.size
+        get_foo_file      foo.file
+        get_foo_width     foo.width
+        get_foo_height    foo.height
+        get_foo_filename  foo.filename
+        ================  ============
+
+        All matches will be replaced with the following exceptions:
+
+        1. matches listed in the config.relations.skip,
+        2. any actual model methods found via settings.INSTALLED_APPS.
+
+        """
         # Use regex fu on the line.
         return line
 
 
     def update_relations(self, line):
-        """Fix references to related objects"""
+        """
+        Fix references to related objects.
+
+        =============  =========
+        Old syntax…    Becomes…
+        -------------  ---------
+        get_foo        foo
+        get_foo_list   foo.all
+        get_foo_count  foo.count
+        =============  =========
+
+        All matches will be replaced with the following exceptions:
+
+        1. matches listed in the config.relations.skip,
+        2. any actual model methods found via settings.INSTALLED_APPS,
+           exlucding those listed in config.relations.update.
+
+        """
         # Use regex fu on the line.
         return line
 
