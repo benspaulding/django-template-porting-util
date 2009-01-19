@@ -17,7 +17,7 @@ extensions:
 
 
 relations:
-    mapping:
+    list_count_map:
 # It would be nice if the ``related_name`` attribute was accounted
 # for dynamically, but that is really, really complicated. So this
 # is the compromise.
@@ -25,12 +25,10 @@ relations:
 # Any get_foo_list and get_foo_count methods will be replaced with
 # foo_set.all and foo_set.count, respectively, unless there is a
 # mapping below.
-        - old: get_staffmember
-          new: bylines
-        - old: get_choice
-          new: choices
+        - get_staffmember: bylines
+        - get_choice: choices
 
-    skip:
+    ignored_methods:
 # When updating file field syntax (via the -f or --update-file-fields
 # option) or relations (via the -r or --update-relations options) the
 # following methods will be left untouched (in addition to all model
@@ -39,7 +37,7 @@ relations:
           # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-absolute-url
         - get_absolute_url
           # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-foo-display
-          # Need to special case ``get_foo_display`` somehow, as ``foo`` is dynamic.
+          # TODO: Need to special case ``get_foo_display`` somehow, as ``foo`` is dynamic.
         - get_foo_display
           # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-next-by-foo-kwargs-and-get-previous-by-foo-kwargs
         - get_next_in_order
@@ -50,7 +48,7 @@ relations:
         - get_good_karma_total
         - get_karma_total
 
-    update:
+    force_update:
 # When updating relations (via the -r or --update-relations
 # options) methods listed below will be forced to a property,
 # i.e. object.get_foo ==> object.foo.
