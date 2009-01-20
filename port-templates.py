@@ -64,7 +64,7 @@ class TemplateMonkey(object):
         self.ignored_methods = config["ignored_methods"]
         self.template_paths = self.create_template_paths(config["template_paths"])
 
-        # Compiling the regexs here for speed.
+        # Compile the regexen here for speed.
         self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
         self.file_regex = re.compile('get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
         self.basic_orm_regex = re.compile('get_(?P<field>.*?)(?P<following_char>\s|\.)')
@@ -158,7 +158,7 @@ class TemplateMonkey(object):
             except KeyError:
                 pass
 
-        # Remove this key as it’s no longer needed. This may be overkill.
+        # Remove this key as it’s no longer needed. (This may be overkill.)
         del config["force_update"]
         return config
 
@@ -242,7 +242,9 @@ class TemplateMonkey(object):
 
         1. matches listed in the ignored_methods,
         2. any actual model methods found via settings.INSTALLED_APPS,
-           excluding those listed in force_update.
+           excluding those listed in force_update (because we added the
+           actual model methods to the ignored_methods list and then
+           removed methods listed in force_update from ignored_methods).
 
         """
         match = self.file_regex.search(line)
@@ -270,7 +272,9 @@ class TemplateMonkey(object):
 
         1. matches listed in the ignored_methods,
         2. any actual model methods found via settings.INSTALLED_APPS,
-           excluding those listed in force_update.
+           excluding those listed in force_update (because we added the
+           actual model methods to the ignored_methods list and then
+           removed methods listed in force_update from ignored_methods).
 
         Note that ``foo_set`` all and count replacements can be customized
         to account for related_name attributes via list_count_map.
