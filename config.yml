@@ -2,6 +2,17 @@
 #   Configuration file for django-template-porting-util.
 ##
 
+template_paths:
+# Note that paths here will only be used if the --template-path option
+# was not used on the command line. Leave empty if you want to use
+# settings.TEMPLATE_DIRS.
+    # Examples,
+    # - /home/spud/templates
+    # - /home/spud/foo/templates/base.html
+    - /Users/benspaulding/code/wol-templates/trunk/ellington_default/base.html
+    - /Users/benspaulding/code/wol-templates/trunk/ellington_mobile_default/events
+
+
 extensions:
 # When adding the extension to template references (via the -x or
 # --add-extension option), references that already end with any of
@@ -16,8 +27,7 @@ extensions:
     - yaml
 
 
-relations:
-    list_count_map:
+list_count_map:
 # It would be nice if the ``related_name`` attribute was accounted
 # for dynamically, but that is really, really complicated. So this
 # is the compromise.
@@ -25,34 +35,37 @@ relations:
 # Any get_foo_list and get_foo_count methods will be replaced with
 # foo_set.all and foo_set.count, respectively, unless there is a
 # mapping below.
-        - get_staffmember: bylines
-        - get_choice: choices
+    # Example,
+    # - get_author: authors
+    - get_staffmember: bylines
+    - get_choice: choices
 
-    ignored_methods:
+
+ignored_methods:
 # When updating file field syntax (via the -f or --update-file-fields
 # option) or relations (via the -r or --update-relations options) the
 # following methods will be left untouched (in addition to all model
 # methods found within settings.INSTALLED_APPS).
-        # Django magic model methods.
-          # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-absolute-url
-        - get_absolute_url
-          # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-foo-display
-          # TODO: Need to special case these three foo ones somehow, as ``foo`` is dynamic.
-        - get_foo_display
-          # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-next-by-foo-kwargs-and-get-previous-by-foo-kwargs
-          # TODO: Decide — maybe the foo just needs left of these ones?
-        - get_next_by_foo
-        - get_previous_by_foo
-        # TODO: I got confused. Check that I actually need these two.
-        - get_next_in_order
-        - get_previous_in_order
-        # Old skool comments methods. Leave these alone just to be tidy.
-        - get_deletion_url
-        - get_flag_url
-        - get_good_karma_total
-        - get_karma_total
+    # Django magic model methods.
+      # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-absolute-url
+    - get_absolute_url
+      # TODO: Need to special case these next three methods somehow, as ``foo`` is dynamic.
+      # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-foo-display
+    - get_foo_display
+      # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-next-by-foo-kwargs-and-get-previous-by-foo-kwargs
+    - get_next_by_foo
+    - get_previous_by_foo
+    # Django class methods.
+    - get_next_in_order
+    - get_previous_in_order
+    # Old skool comments methods. Leave these alone just to be tidy.
+    - get_deletion_url
+    - get_flag_url
+    - get_good_karma_total
+    - get_karma_total
 
-    force_update:
+
+force_update:
 # When updating relations (via the -r or --update-relations
 # options) methods listed below will be forced to a property,
 # i.e. object.get_foo ==> object.foo.
@@ -62,8 +75,10 @@ relations:
 # method called ``get_foo`` (and would thus normally be skipped)
 # that has minimal usage. This simply lets you choose which one
 # you want to correct by hand: the relation or the method.
-        # Weblogs methods that did not exist in Old Ellington.
-        - get_author
-        - get_author_list
-        # Obscure CombinedPoll model method.
-        - get_choice_list
+    # Example,
+    # - get_foo
+    # Weblogs methods that did not exist in Old Ellington.
+    - get_author
+    - get_author_list
+    # Obscure CombinedPoll model method.
+    - get_choice_list

@@ -6,9 +6,3 @@
 - Implement --verbose and --quiet options
 - Choose license and apply it consistently
 - Implement proper setup.py
-- Consider allowing template paths to be specified via a template_paths key
-  in the config file. Order of priority would be:
-
-  1. command line options
-  2. config.template_paths
-  3. settings.TEMPLATE_DIRS
