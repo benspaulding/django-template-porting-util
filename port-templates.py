@@ -27,6 +27,7 @@ __url__ = "http://github.com/benspaulding/django-template-porting-util"
 __version__ = "0.9"
 
 import os
+import re
 import sys
 import yaml
 from pprint import PrettyPrinter
@@ -62,6 +63,10 @@ class TemplateMonkey(object):
         self.list_count_map = config["list_count_map"]
         self.ignored_methods = config["ignored_methods"]
         self.template_paths = self.create_template_paths(config["template_paths"])
+
+        # Compiling the regexs here for speed.
+        self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
+        self.file_regex = re.compile('get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
 
 
     def port_templates(self, dry_run=False):
@@ -208,7 +213,11 @@ class TemplateMonkey(object):
         listed in config.extensions will be skipped.
 
         """
-        # Use regex fu on the line.
+        match = self.extension_regex.search(line)
+
+        if match:
+            line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
+
         return line
 
 
@@ -234,7 +243,11 @@ class TemplateMonkey(object):
            excluding those listed in force_update.
 
         """
-        # Use regex fu on the line.
+        match = self.file_regex.search(line)
+
+        if match:
+            line = self.file_regex.sub('\g<field>.\g<method>', line)
+
         return line
 
 
