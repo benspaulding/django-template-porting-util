@@ -66,10 +66,10 @@ class TemplateMonkey(object):
 
         # Compile the regexen here for speed.
         self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
-        self.file_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
-        self.basic_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)(?P<following_char>\s|\.)')
-        self.count_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_count')
-        self.list_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_list')
+        self.file_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
+        self.basic_orm_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)(?P<following_char>\s|\.)')
+        self.count_orm_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_count')
+        self.list_orm_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_list')
 
 
     def port_templates(self, dry_run=False):
@@ -181,7 +181,7 @@ class TemplateMonkey(object):
             # Generally directories will be given to us.
             if os.path.isdir(path):
                 for dirpath, dirnames, filenames in os.walk(path):
-                    # TODO: exlclude .* directories.
+                    # TODO: exclude .* directories.
                     for filename in filenames:
                         if not filename.startswith("."):
                             template_paths.append(os.path.join(dirpath, filename))
@@ -251,7 +251,7 @@ class TemplateMonkey(object):
 
         if match:
             if not match.group('field') in self.ignored_methods:
-                line = self.file_regex.sub('\g<field>.\g<method>', line)
+                line = self.file_regex.sub('\g<prepend_char>\g<field>.\g<method>', line)
 
         return line
 
@@ -280,23 +280,24 @@ class TemplateMonkey(object):
         to account for related_name attributes via list_count_map.
 
         """
-        match = self.basic_orm_regex.search(line)
+        count_match = self.count_orm_regex.search(line)
 
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
+        if count_match:
+            if not count_match.group('field') in self.ignored_methods:
+                line = self.count_orm_regex.sub('\g<prepend_char>\g<field>.count', line)
+        
+        list_match = self.list_orm_regex.search(line)
 
-        match = self.count_orm_regex.search(line)
+        if list_match:
+            if not list_match.group('field') in self.ignored_methods:
+                line = self.list_orm_regex.sub('\g<prepend_char>\g<field>.all', line)
+        
+        # Do the basic check last.
+        basic_match = self.basic_orm_regex.search(line)
 
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.count_orm_regex.sub('\g<field>.count', line)
-
-        match = self.list_orm_regex.search(line)
-
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.list_orm_regex.sub('\g<field>.all', line)
+        if basic_match:
+            if not basic_match.group('field') in self.ignored_methods:
+                line = self.basic_orm_regex.sub('\g<prepend_char>\g<field>\g<following_char>', line)
 
         return line
 
