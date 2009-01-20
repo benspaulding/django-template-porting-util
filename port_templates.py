@@ -64,7 +64,7 @@ class TemplateMonkey(object):
         self.ignored_methods = config["ignored_methods"]
         self.template_paths = self.create_template_paths(config["template_paths"])
 
-        # Compiling the regexs here for speed.
+        # Compile the regexen here for speed.
         self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
         self.file_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
         self.basic_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)(?P<following_char>\s|\.)')
@@ -89,27 +89,27 @@ class TemplateMonkey(object):
             with open(template_path, "r+") as template:
                 # Stow the original.
                 original_template = template
-                revised_template = ""
+                ported_template = ""
                 
                 for line in template:
                     # Now call each method on every line of the template, as needed.
                     if self.options.add_extension:
-                        self.add_extension(line)
+                        line = self.add_extension(line)
                     if self.options.update_file_fields:
-                        self.update_file_fields(line)
+                        line = self.update_file_fields(line)
                     if self.options.update_relations:
-                        self.update_relations(line)
+                        line = self.update_relations(line)
                     
-                    revised_template += line
+                    ported_template += line
                     
                 if not dry_run:
                     new_template_file = open(template_path, 'w')
-                    new_template_file.write(revised_template)
+                    new_template_file.write(ported_template)
                     new_template_file.close()
                 else:
                     from difflib import unified_diff
                     print "Diff for '%s'" % template_path
-                    print "".join(unified_diff(original_template, revised_template))
+                    print "".join(unified_diff(original_template, ported_template))
                     print
 
 
@@ -158,7 +158,7 @@ class TemplateMonkey(object):
             except KeyError:
                 pass
 
-        # Remove this key as it’s no longer needed. This may be overkill.
+        # Remove this key as it’s no longer needed. (This may be overkill.)
         del config["force_update"]
         return config
 
@@ -242,13 +242,15 @@ class TemplateMonkey(object):
 
         1. matches listed in the ignored_methods,
         2. any actual model methods found via settings.INSTALLED_APPS,
-           excluding those listed in force_update.
+           excluding those listed in force_update (because we added the
+           actual model methods to the ignored_methods list and then
+           removed methods listed in force_update from ignored_methods).
 
         """
         match = self.file_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.file_regex.sub('\g<field>.\g<method>', line)
 
         return line
@@ -270,7 +272,9 @@ class TemplateMonkey(object):
 
         1. matches listed in the ignored_methods,
         2. any actual model methods found via settings.INSTALLED_APPS,
-           excluding those listed in force_update.
+           excluding those listed in force_update (because we added the
+           actual model methods to the ignored_methods list and then
+           removed methods listed in force_update from ignored_methods).
 
         Note that ``foo_set`` all and count replacements can be customized
         to account for related_name attributes via list_count_map.
@@ -279,19 +283,19 @@ class TemplateMonkey(object):
         match = self.basic_orm_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
 
         match = self.count_orm_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.count_orm_regex.sub('\g<field>.count', line)
 
         match = self.list_orm_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.list_orm_regex.sub('\g<field>.all', line)
 
         return line
