@@ -65,11 +65,11 @@ class TemplateMonkey(object):
         self.template_paths = self.create_template_paths(config["template_paths"])
 
         # Compile the regexen here for speed.
-        self.ext_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
-        self.file_regex = re.compile('get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
-        self.rel_regex = re.compile('get_(?P<field>.*?)(?P<following_char>\s|\.)')
-        self.rel_count_regex = re.compile('get_(?P<field>.*?)_count')
-        self.rel_list_regex = re.compile('get_(?P<field>.*?)_list')
+        self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
+        self.file_field_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
+        self.rel_basic_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)(?P<following_char>\s|\.)')
+        self.rel_count_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_count')
+        self.rel_list_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_list')
 
 
     def port_templates(self, dry_run=False):
@@ -181,7 +181,7 @@ class TemplateMonkey(object):
             # Generally directories will be given to us.
             if os.path.isdir(path):
                 for dirpath, dirnames, filenames in os.walk(path):
-                    # TODO: exlclude .* directories.
+                    # TODO: exclude .* directories.
                     for filename in filenames:
                         if not filename.startswith("."):
                             template_paths.append(os.path.join(dirpath, filename))
@@ -215,10 +215,10 @@ class TemplateMonkey(object):
         listed in config.extensions will be skipped.
 
         """
-        match = self.ext_regex.search(line)
+        match = self.extension_regex.search(line)
 
         if match:
-            line = self.ext_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
+            line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
 
         return line
 
@@ -247,11 +247,11 @@ class TemplateMonkey(object):
            removed methods listed in force_update from ignored_methods).
 
         """
-        match = self.file_regex.search(line)
+        match = self.file_field_regex.search(line)
 
         if match:
             if not match.group('field') in self.ignored_methods:
-                line = self.file_regex.sub('\g<field>.\g<method>', line)
+                line = self.file_field_regex.sub('\g<prepend_char>\g<field>.\g<method>', line)
 
         return line
 
@@ -280,23 +280,24 @@ class TemplateMonkey(object):
         to account for related_name attributes via list_count_map.
 
         """
-        match = self.rel_regex.search(line)
+        count_match = self.rel_count_regex.search(line)
 
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.rel_regex.sub('\g<field>\g<following_char>', line)
+        if count_match:
+            if not count_match.group('field') in self.ignored_methods:
+                line = self.rel_count_regex.sub('\g<prepend_char>\g<field>.count', line)
 
-        match = self.rel_count_regex.search(line)
+        list_match = self.rel_list_regex.search(line)
 
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.rel_count_regex.sub('\g<field>.count', line)
+        if list_match:
+            if not list_match.group('field') in self.ignored_methods:
+                line = self.rel_list_regex.sub('\g<prepend_char>\g<field>.all', line)
 
-        match = self.rel_list_regex.search(line)
+        # Do the basic check last.
+        basic_match = self.rel_basic_regex.search(line)
 
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.rel_list_regex.sub('\g<field>.all', line)
+        if basic_match:
+            if not basic_match.group('field') in self.ignored_methods:
+                line = self.rel_basic_regex.sub('\g<prepend_char>\g<field>\g<following_char>', line)
 
         return line
 
