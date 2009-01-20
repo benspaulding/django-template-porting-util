@@ -67,6 +67,9 @@ class TemplateMonkey(object):
         # Compiling the regexs here for speed.
         self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
         self.file_regex = re.compile('get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
+        self.basic_orm_regex = re.compile('get_(?P<field>.*?)(?P<following_char>\s|\.)')
+        self.count_orm_regex = re.compile('get_(?P<field>.*?)_count')
+        self.list_orm_regex = re.compile('get_(?P<field>.*?)_list')
 
 
     def port_templates(self, dry_run=False):
@@ -273,7 +276,21 @@ class TemplateMonkey(object):
         to account for related_name attributes via list_count_map.
 
         """
-        # Use regex fu on the line.
+        match = self.basic_orm_regex.search(line)
+
+        if match:
+            line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
+
+        match = self.count_orm_regex.search(line)
+
+        if match:
+            line = self.count_orm_regex.sub('\g<field>.count', line)
+
+        match = self.list_orm_regex.search(line)
+
+        if match:
+            line = self.list_orm_regex.sub('\g<field>.all', line)
+
         return line
 
 
