@@ -21,7 +21,7 @@ from __future__ import with_statement
 
 __author__ = "Ben Spaulding"
 __contributors__ = ["Daniel Lindsley",]
-__copyright__ = "(c) 2008 Ben Spaulding. New BSD."
+__copyright__ = "Copyright (c) 2008, Ben Spaulding. All rights reserved."
 __description__ = "Update Django template syntax from .9x to 1.0."
 __url__ = "http://github.com/benspaulding/django-template-porting-util"
 __version__ = "0.9"
@@ -36,7 +36,8 @@ try:
     from django.template import BLOCK_TAG_START, BLOCK_TAG_END
     from django.template import VARIABLE_TAG_START, VARIABLE_TAG_END
     from django.template import COMMENT_TAG_START, COMMENT_TAG_END
-except ImportError:
+    DJANGO_SETTINGS_MODULE = os.environ["DJANGO_SETTINGS_MODULE"]
+except (ImportError, KeyError):
     print u"Cannot find Django. Did you setup your environment correctly? (Don’t forget to set the DJANGO_SETTINGS_MODULE environment variable.)"
     sys.exit()
 
@@ -52,7 +53,7 @@ class TemplateMonkey(object):
             self.settings = __import__(self.options.settings)
             os.environ["DJANGO_SETTINGS_MODULE"] = self.options.settings
         except ImportError:
-            print u"Cannot load the specified settings module."
+            print u"Cannot load settings module."
             sys.exit()
 
         self.printer = PrettyPrinter(indent=2)
@@ -257,12 +258,12 @@ if __name__ == "__main__":
 
     parser = OptionParser(usage=usage, description=desc)
     options_array = [
-        ["-v", "--verbose", dict(
-                                dest="verbose", action="store_true",
-                                help=u"output all information to the console")],
         ["-q", "--quiet", dict(
-                                dest="verbose", action="store_false",
+                                dest="verbosity", action="store_false",
                                 help=u"output nothing to the console")],
+        ["-v", "--verbose", dict(
+                                dest="verbosity", action="store_true",
+                                help=u"output all information to the console")],
         ["-n", "--dry-run", dict(
                                 dest="dry_run", action="store_true",
                                 help=u"run everything as normal but don’t save any changes")],
@@ -276,7 +277,7 @@ if __name__ == "__main__":
                                 dest="update_relations", action="store_true",
                                 help=u"update old relation methods to new attributes, i.e. get_bar => bar, get_baz_list => baz_set.all, etc.")],
         ["-s", "--settings", dict(
-                                dest="settings", action="store", default=os.environ["DJANGO_SETTINGS_MODULE"],
+                                dest="settings", action="store", default=DJANGO_SETTINGS_MODULE,
                                 help=u"use the given settings module (default to $DJANGO_SETTINGS_MODULE)", metavar="settings.module")],
         ["-t", "--template-path", dict(
                                 dest="template_paths", action="append", default=[],

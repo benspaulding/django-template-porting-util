@@ -2,7 +2,7 @@
  TODO
 ======
 
-- Implement --dry-run option
-- Implement --verbose and --quiet options
-- Choose license and apply it consistently
-- Implement proper setup.py
+- Implement --dry-run option,
+- Implement --verbose and --quiet options, along with standard printing,
+- Research and implement proper setup.py,
+- Implement that important bit, even the regular expression replacements. :)

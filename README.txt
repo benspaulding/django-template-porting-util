@@ -1,3 +1,22 @@
 ==============================
  django-template-porting-util
 ==============================
+
+Python utility for porting Django template syntax from .9x to 1.0.
+
+This program automates much of the process of moving your Django templates from
+Django .9x to Django 1.0. It is safe to re-run this program on templates if,
+for example, you are porting templates while the old templates are still in use
+and subject to change. Just put any new templates in the template directory and
+re-run. Remember that you can also point to a specific directory, or even a
+specific template.
+
+WARNING: This program irreversibly alters your templates! It is essential that
+you use some form of version control or at least make backups of your files
+before every use.
+
+Requirements
+------------
+
+* Python 2.5 or 2.6
+* Django 1.0 or later
