@@ -94,11 +94,11 @@ class TemplateMonkey(object):
                 for line in template:
                     # Now call each method on every line of the template, as needed.
                     if self.options.add_extension:
-                        self.add_extension(line)
+                        line = self.add_extension(line)
                     if self.options.update_file_fields:
-                        self.update_file_fields(line)
+                        line = self.update_file_fields(line)
                     if self.options.update_relations:
-                        self.update_relations(line)
+                        line = self.update_relations(line)
                     
                     revised_template += line
                     
