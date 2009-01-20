@@ -89,7 +89,7 @@ class TemplateMonkey(object):
             with open(template_path, "r+") as template:
                 # Stow the original.
                 original_template = template
-                revised_template = ""
+                ported_template = ""
                 
                 for line in template:
                     # Now call each method on every line of the template, as needed.
@@ -100,16 +100,16 @@ class TemplateMonkey(object):
                     if self.options.update_relations:
                         line = self.update_relations(line)
                     
-                    revised_template += line
+                    ported_template += line
                     
                 if not dry_run:
                     new_template_file = open(template_path, 'w')
-                    new_template_file.write(revised_template)
+                    new_template_file.write(ported_template)
                     new_template_file.close()
                 else:
                     from difflib import unified_diff
                     print "Diff for '%s'" % template_path
-                    print "".join(unified_diff(original_template, revised_template))
+                    print "".join(unified_diff(original_template, ported_template))
                     print
 
 
