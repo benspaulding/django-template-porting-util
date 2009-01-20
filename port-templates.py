@@ -248,7 +248,7 @@ class TemplateMonkey(object):
         match = self.file_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.file_regex.sub('\g<field>.\g<method>', line)
 
         return line
@@ -279,19 +279,19 @@ class TemplateMonkey(object):
         match = self.basic_orm_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
 
         match = self.count_orm_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.count_orm_regex.sub('\g<field>.count', line)
 
         match = self.list_orm_regex.search(line)
 
         if match:
-            if not match.group('field') in self.config["ignored_methods"]:
+            if not match.group('field') in self.ignored_methods:
                 line = self.list_orm_regex.sub('\g<field>.all', line)
 
         return line
