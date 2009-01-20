@@ -65,11 +65,11 @@ class TemplateMonkey(object):
         self.template_paths = self.create_template_paths(config["template_paths"])
 
         # Compile the regexen here for speed.
-        self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
+        self.ext_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
         self.file_regex = re.compile('get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
-        self.basic_orm_regex = re.compile('get_(?P<field>.*?)(?P<following_char>\s|\.)')
-        self.count_orm_regex = re.compile('get_(?P<field>.*?)_count')
-        self.list_orm_regex = re.compile('get_(?P<field>.*?)_list')
+        self.rel_regex = re.compile('get_(?P<field>.*?)(?P<following_char>\s|\.)')
+        self.rel_count_regex = re.compile('get_(?P<field>.*?)_count')
+        self.rel_list_regex = re.compile('get_(?P<field>.*?)_list')
 
 
     def port_templates(self, dry_run=False):
@@ -103,9 +103,9 @@ class TemplateMonkey(object):
                     ported_template += line
                     
                 if not dry_run:
-                    new_template_file = open(template_path, 'w')
-                    new_template_file.write(ported_template)
-                    new_template_file.close()
+                    ported_template_file = open(template_path, 'w')
+                    ported_template_file.write(ported_template)
+                    ported_template_file.close()
                 else:
                     from difflib import unified_diff
                     print "Diff for '%s'" % template_path
@@ -215,10 +215,10 @@ class TemplateMonkey(object):
         listed in config.extensions will be skipped.
 
         """
-        match = self.extension_regex.search(line)
+        match = self.ext_regex.search(line)
 
         if match:
-            line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
+            line = self.ext_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
 
         return line
 
@@ -280,23 +280,23 @@ class TemplateMonkey(object):
         to account for related_name attributes via list_count_map.
 
         """
-        match = self.basic_orm_regex.search(line)
+        match = self.rel_regex.search(line)
 
         if match:
             if not match.group('field') in self.ignored_methods:
-                line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
+                line = self.rel_regex.sub('\g<field>\g<following_char>', line)
 
-        match = self.count_orm_regex.search(line)
-
-        if match:
-            if not match.group('field') in self.ignored_methods:
-                line = self.count_orm_regex.sub('\g<field>.count', line)
-
-        match = self.list_orm_regex.search(line)
+        match = self.rel_count_regex.search(line)
 
         if match:
             if not match.group('field') in self.ignored_methods:
-                line = self.list_orm_regex.sub('\g<field>.all', line)
+                line = self.rel_count_regex.sub('\g<field>.count', line)
+
+        match = self.rel_list_regex.search(line)
+
+        if match:
+            if not match.group('field') in self.ignored_methods:
+                line = self.rel_list_regex.sub('\g<field>.all', line)
 
         return line
 
