@@ -66,10 +66,10 @@ class TemplateMonkey(object):
 
         # Compiling the regexs here for speed.
         self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
-        self.file_regex = re.compile('get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
-        self.basic_orm_regex = re.compile('get_(?P<field>.*?)(?P<following_char>\s|\.)')
-        self.count_orm_regex = re.compile('get_(?P<field>.*?)_count')
-        self.list_orm_regex = re.compile('get_(?P<field>.*?)_list')
+        self.file_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
+        self.basic_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)(?P<following_char>\s|\.)')
+        self.count_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_count')
+        self.list_orm_regex = re.compile('(\.|\"|\')get_(?P<field>.*?)_list')
 
 
     def port_templates(self, dry_run=False):
