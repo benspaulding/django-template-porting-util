@@ -64,7 +64,7 @@ class TemplateMonkey(object):
         self.template_paths = self.create_template_paths(config["template_paths"])
 
 
-    def port_templates(self):
+    def port_templates(self, dry_run=False):
         """Run requested methods on the specified templates."""
 
         if not self.options.add_extension and \
@@ -79,18 +79,30 @@ class TemplateMonkey(object):
             # Note that “with” statements have to be enabled in Python 2.5. See
             # http://docs.python.org/whatsnew/2.5.html#pep-343-the-with-statement
             with open(template_path, "r+") as template:
+                # Stow the original.
+                original_template = template
+                revised_template = ""
+                
                 for line in template:
                     # Now call each method on every line of the template, as needed.
-                    # Q: Do I need to flush anywhere for this to work?
                     if self.options.add_extension:
                         self.add_extension(line)
                     if self.options.update_file_fields:
                         self.update_file_fields(line)
                     if self.options.update_relations:
                         self.update_relations(line)
-                # TODO: Here (I believe) is where I need to write each line
-                #       back to the template file. How?
-                # template.write(template)
+                    
+                    revised_template += line
+                    
+                if not dry_run:
+                    new_template_file = open(template_path, 'w')
+                    new_template_file.write(revised_template)
+                    new_template_file.close()
+                else:
+                    from difflib import unified_diff
+                    print "Diff for '%s'" % template_path
+                    print "".join(unified_diff(original_template, revised_template))
+                    print
 
 
     def load_config(self):
