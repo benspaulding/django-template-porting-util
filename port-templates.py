@@ -144,23 +144,22 @@ class TemplateMonkey(object):
         # Use a set because it’s fast and avoids duplicates.
         # Q: If the YAML syntax is wrong we will get a confusing
         #    error message here. Should we handle that exception?
-        s = set(config["ignored_methods"])
+        config["ignored_methods"] = set(config["ignored_methods"])
         for model in models.get_models():
             for func_name, func in model.__dict__.items():
                 if func_name.startswith("get_"):
-                    s.add(func_name)
+                    config["ignored_methods"].add(func_name)
 
         # Now remove methods from the ignored_methods list that
         # are to be updated despite being actual methods.
         for method in config["force_update"]:
-            try: s.remove(method)
-            except KeyError: pass
+            try:
+                config["ignored_methods"].remove(method)
+            except KeyError:
+                pass
 
         # Remove this key as it’s no longer needed. This may be overkill.
         del config["force_update"]
-
-        # Now drop the set back into our list.
-        config["ignored_methods"] = list(s)
         return config
 
 
@@ -249,7 +248,8 @@ class TemplateMonkey(object):
         match = self.file_regex.search(line)
 
         if match:
-            line = self.file_regex.sub('\g<field>.\g<method>', line)
+            if not match.group('field') in self.config["ignored_methods"]:
+                line = self.file_regex.sub('\g<field>.\g<method>', line)
 
         return line
 
@@ -279,17 +279,20 @@ class TemplateMonkey(object):
         match = self.basic_orm_regex.search(line)
 
         if match:
-            line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
+            if not match.group('field') in self.config["ignored_methods"]:
+                line = self.basic_orm_regex.sub('\g<field>\g<following_char>', line)
 
         match = self.count_orm_regex.search(line)
 
         if match:
-            line = self.count_orm_regex.sub('\g<field>.count', line)
+            if not match.group('field') in self.config["ignored_methods"]:
+                line = self.count_orm_regex.sub('\g<field>.count', line)
 
         match = self.list_orm_regex.search(line)
 
         if match:
-            line = self.list_orm_regex.sub('\g<field>.all', line)
+            if not match.group('field') in self.config["ignored_methods"]:
+                line = self.list_orm_regex.sub('\g<field>.all', line)
 
         return line
 
