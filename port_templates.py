@@ -91,7 +91,7 @@ class TemplateMonkey(object):
                 # Stow the original.
                 original_template = template
                 ported_template = ""
-                
+
                 for line in template:
                     # Now call each method on every line of the template, as needed.
                     if self.options.add_extension:
@@ -100,9 +100,9 @@ class TemplateMonkey(object):
                         line = self.update_file_fields(line)
                     if self.options.update_relations:
                         line = self.update_relations(line)
-                    
+
                     ported_template += line
-                    
+
                 if not self.dry_run:
                     ported_template_file = open(template_path, 'w')
                     ported_template_file.write(ported_template)
