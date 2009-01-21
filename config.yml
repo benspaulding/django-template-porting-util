@@ -39,6 +39,8 @@ list_count_map:
     # - get_author: authors
     - get_staffmember: bylines
     - get_choice: choices
+    - get_weblogs_blog: blogs
+    - get_blog: entries
 
 
 ignored_methods:
