@@ -57,6 +57,7 @@ class TemplateMonkey(object):
             print u"Cannot load settings module."
             sys.exit()
 
+        self.dry_run = self.options.dry_run
         self.printer = PrettyPrinter(indent=2)
         config = self.load_config()
         self.extensions = config["extensions"]
@@ -72,7 +73,7 @@ class TemplateMonkey(object):
         self.rel_list_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_list')
 
 
-    def port_templates(self, dry_run=False):
+    def port_templates(self):
         """Run requested methods on the specified templates."""
 
         if not self.options.add_extension and \
@@ -102,7 +103,7 @@ class TemplateMonkey(object):
                     
                     ported_template += line
                     
-                if not dry_run:
+                if not self.dry_run:
                     ported_template_file = open(template_path, 'w')
                     ported_template_file.write(ported_template)
                     ported_template_file.close()
