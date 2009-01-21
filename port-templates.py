@@ -321,14 +321,14 @@ class ReplacementTestCase(unittest.TestCase):
             '{% inclued "foo" %}': '{% inclued "foo" %}',
             '{% include foo %}': '{% include foo %}',
         }
-        self.sample_file_templates = {
+        self.sample_file_field_templates = {
             'This is {{ model.get_myfield_url }}': 'This is {{ model.myfield.url }}',
             'This is {{ model.get_myfield_size }}': 'This is {{ model.myfield.size }}',
             'This is {{ model.get_myfield_width }}': 'This is {{ model.myfield.width }}',
             'This is {{ model.get_myfield_height }}': 'This is {{ model.myfield.height }}',
             'This is {{ model.get_myfield_filename }}': 'This is {{ model.myfield.filename }}',
         }
-        self.sample_orm_templates = {
+        self.sample_relations_templates = {
             'This is {{ model.get_myfield }}': 'This is {{ model.myfield }}',
             'This is {{ model.get_myfield_count }}': 'This is {{ model.myfield.count }}',
             'This is {{ model.get_myfield_list }}': 'This is {{ model.myfield.all }}',
@@ -340,12 +340,12 @@ class ReplacementTestCase(unittest.TestCase):
         for old_template, new_template in self.sample_extension_templates.items():
             self.assertEqual(self.monkey.add_extension(old_template), new_template)
 
-    def test_files(self):
-        for old_template, new_template in self.sample_file_templates.items():
+    def test_file_fields(self):
+        for old_template, new_template in self.sample_file_field_templates.items():
             self.assertEqual(self.monkey.update_file_fields(old_template), new_template)
 
-    def test_orm(self):
-        for old_template, new_template in self.sample_orm_templates.items():
+    def test_relations(self):
+        for old_template, new_template in self.sample_relations_templates.items():
             self.assertEqual(self.monkey.update_relations(old_template), new_template)
 
 
