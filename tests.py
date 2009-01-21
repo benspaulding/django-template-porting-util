@@ -66,13 +66,13 @@ class ReplacementTestCase(unittest.TestCase):
                                     dest="config_path", action="store", default="config.yml", metavar="/path/to/file.yml",
                                     help=u"use the specified YAML file for special-case exceptions. (default to config.yml)")
 
-        options, args = parser.parse_args()
-        
+        (globals()["options"], args) = parser.parse_args()
+
         # Mock. Grr.
         TemplateMonkey.create_template_paths = lambda self, x: []
 
-        self.monkey = TemplateMonkey(options, args)
-    
+        self.monkey = TemplateMonkey()
+
     def test_extensions(self):
         for old_template, new_template in self.sample_extension_templates.items():
             self.assertEqual(self.monkey.add_extension(old_template), new_template)

@@ -45,25 +45,21 @@ except (ImportError, KeyError):
 
 class TemplateMonkey(object):
 
-    def __init__(self, options, args):
-        self.options = options
-        # Q: Do I need args here? Don’t know when or why I’d use them.
-        self.args = args
+    def __init__(self):
 
         try:
-            self.settings = __import__(self.options.settings)
-            os.environ["DJANGO_SETTINGS_MODULE"] = self.options.settings
+            self.settings = __import__(options.settings)
+            os.environ["DJANGO_SETTINGS_MODULE"] = options.settings
         except ImportError:
             print u"Cannot load settings module."
             sys.exit()
 
-        self.dry_run = self.options.dry_run
         self.printer = PrettyPrinter(indent=2)
         config = self.load_config()
         self.extensions = config["extensions"]
         self.related_names = config["related_names"]
         self.ignored_methods = config["ignored_methods"]
-        self.template_paths = self.create_template_paths(config["template_paths"])
+        self.template_paths = config["template_paths"]
 
         # Compile the regexen here for speed.
         self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
@@ -76,9 +72,9 @@ class TemplateMonkey(object):
     def port_templates(self):
         """Run requested methods on the specified templates."""
 
-        if not self.options.add_extension and \
-           not self.options.update_file_fields and \
-           not self.options.update_relations:
+        if not options.add_extension and \
+           not options.update_file_fields and \
+           not options.update_relations:
             print u"This monkey won’t do anything unless you tell it to — see available options by running “port_templates.py --help”"
             sys.exit()
 
@@ -94,16 +90,16 @@ class TemplateMonkey(object):
 
                 for line in template:
                     # Now call each method on every line of the template, as needed.
-                    if self.options.add_extension:
+                    if options.add_extension:
                         line = self.add_extension(line)
-                    if self.options.update_file_fields:
+                    if options.update_file_fields:
                         line = self.update_file_fields(line)
-                    if self.options.update_relations:
+                    if options.update_relations:
                         line = self.update_relations(line)
 
                     ported_template += line
 
-                if not self.dry_run:
+                if not options.dry_run:
                     ported_template_file = open(template_path, 'w')
                     ported_template_file.write(ported_template)
                     ported_template_file.close()
@@ -131,13 +127,13 @@ class TemplateMonkey(object):
         # Q: What if config_file is moved/altered while after being opened,
         #    and before being closed? Anything?
         # try:
-        #     config_file = open(self.options.config_path)
+        #     config_file = open(options.config_path)
         # except IOError:
         #     print u"The specified configuration file could not be found."
         #     sys.exit()
         # config = yaml.load(config_file)
         # config_file.close()
-        with open(self.options.config_path) as config_file:
+        with open(options.config_path) as config_file:
             config = yaml.load(config_file)
 
         # Append all get_* methods from all models to the list
@@ -161,6 +157,11 @@ class TemplateMonkey(object):
 
         # Remove this key as it’s no longer needed. (This may be overkill.)
         del config["force_update"]
+
+        # This is the place to do this, but the execution looks a little
+        # wonky. Maybe there is a more graceful way to do this?
+        config["template_paths"] = self.create_template_paths(config["template_paths"])
+
         return config
 
 
@@ -178,7 +179,7 @@ class TemplateMonkey(object):
         """
         template_paths = []
 
-        for path in self.options.template_paths or config_paths or self.settings.TEMPLATE_DIRS:
+        for path in options.template_paths or config_paths or self.settings.TEMPLATE_DIRS:
             # Generally directories will be given to us.
             if os.path.isdir(path):
                 for dirpath, dirnames, filenames in os.walk(path):
@@ -338,7 +339,7 @@ if __name__ == "__main__":
                                 dest="config_path", action="store", default="config.yml", metavar="/path/to/file.yml",
                                 help=u"use the specified YAML file for special-case exceptions. (default to config.yml)")
 
-    options, args = parser.parse_args()
+    (globals()["options"], args) = parser.parse_args()
 
-    monkey = TemplateMonkey(options, args)
+    monkey = TemplateMonkey()
     monkey.port_templates()
