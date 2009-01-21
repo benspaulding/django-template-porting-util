@@ -30,6 +30,7 @@ import os
 import re
 import sys
 import yaml
+import unittest
 from pprint import PrettyPrinter
 from optparse import OptionParser
 
@@ -306,6 +307,48 @@ class TemplateMonkey(object):
         return line
 
 
+class ReplacementTestCase(unittest.TestCase):
+    def setUp(self):
+        self.sample_extension_templates = {
+            '{% extends "foo" %}': '{% extends "foo.html" %}',
+            '{% extends \'foo\' %}{{ model.foo }}': '{% extends "foo.html" %}{{ model.foo }}',
+            '{% extends "foo.html" %}': '{% extends "foo.html" %}',
+            '{% extensd "foo" %}': '{% extensd "foo" %}',
+            '{% extends foo %}': '{% extends foo %}',
+            '{% include "foo" %}': '{% include "foo.html" %}',
+            '{% include \'foo\' %}{{ model.foo }}': '{% include "foo.html" %}{{ model.foo }}',
+            '{% include "foo.html" %}': '{% include "foo.html" %}',
+            '{% inclued "foo" %}': '{% inclued "foo" %}',
+            '{% include foo %}': '{% include foo %}',
+        }
+        self.sample_file_templates = {
+            'This is {{ model.get_myfield_url }}': 'This is {{ model.myfield.url }}',
+            'This is {{ model.get_myfield_size }}': 'This is {{ model.myfield.size }}',
+            'This is {{ model.get_myfield_width }}': 'This is {{ model.myfield.width }}',
+            'This is {{ model.get_myfield_height }}': 'This is {{ model.myfield.height }}',
+            'This is {{ model.get_myfield_filename }}': 'This is {{ model.myfield.filename }}',
+        }
+        self.sample_orm_templates = {
+            'This is {{ model.get_myfield }}': 'This is {{ model.myfield }}',
+            'This is {{ model.get_myfield_count }}': 'This is {{ model.myfield.count }}',
+            'This is {{ model.get_myfield_list }}': 'This is {{ model.myfield.all }}',
+        }
+
+        self.monkey = TemplateMonkey()
+
+    def test_extensions(self):
+        for old_template, new_template in self.sample_extension_templates.items():
+            self.assertEqual(self.monkey.add_extension(old_template), new_template)
+
+    def test_files(self):
+        for old_template, new_template in self.sample_file_templates.items():
+            self.assertEqual(self.monkey.update_file_fields(old_template), new_template)
+
+    def test_orm(self):
+        for old_template, new_template in self.sample_orm_templates.items():
+            self.assertEqual(self.monkey.update_relations(old_template), new_template)
+
+
 if __name__ == "__main__":
     usage = """%prog [options]"""
     desc = __doc__
@@ -338,8 +381,15 @@ if __name__ == "__main__":
     parser.add_option("-c", "--config-yaml",
                                 dest="config_path", action="store", default="config.yml", metavar="/path/to/file.yml",
                                 help=u"use the specified YAML file for special-case exceptions. (default to config.yml)")
+    parser.add_option("-T", "--run-tests",
+                                dest="run_tests", action="store_true",
+                                help=u"run unit tests for this program")
 
     (globals()["options"], args) = parser.parse_args()
 
-    monkey = TemplateMonkey()
-    monkey.port_templates()
+    if options.run_tests:
+        suite = unittest.TestLoader().loadTestsFromTestCase(ReplacementTestCase)
+        unittest.TextTestRunner(verbosity=2).run(suite)
+    else:
+        monkey = TemplateMonkey()
+        monkey.port_templates()
