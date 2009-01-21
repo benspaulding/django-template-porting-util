@@ -13,9 +13,11 @@ class ReplacementTestCase(unittest.TestCase):
             '{% extends "foo" %}': '{% extends "foo.html" %}',
             '{% extends \'foo\' %}{{ model.foo }}': '{% extends "foo.html" %}{{ model.foo }}',
             '{% extends "foo.html" %}': '{% extends "foo.html" %}',
+            '{% extensd "foo" %}': '{% extensd "foo" %}',
             '{% include "foo" %}': '{% include "foo.html" %}',
             '{% include \'foo\' %}{{ model.foo }}': '{% include "foo.html" %}{{ model.foo }}',
             '{% include "foo.html" %}': '{% include "foo.html" %}',
+            '{% inclued "foo" %}': '{% inclued "foo" %}',
         }
         self.sample_file_templates = {
             'This is {{ model.get_myfield_url }}': 'This is {{ model.myfield.url }}',
