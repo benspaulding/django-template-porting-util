@@ -63,11 +63,12 @@ class TemplateMonkey(object):
         self.template_paths = config['template_paths']
 
         # Compile the regexen here for speed.
-        self.extension_regex = re.compile('{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}')
-        self.file_field_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename)')
-        self.rel_basic_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)(?P<following_char>\s|\.)')
-        self.rel_count_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_count')
-        self.rel_list_regex = re.compile('(?P<prepend_char>\.|\"|\')get_(?P<field>.*?)_list')
+        self.extension_regex = re.compile("{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}")
+        self.extension_present_regex = re.compile("{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)\.(" + "|".join(config['extensions']) + ")(\"|\')\s+%}")
+        self.file_field_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename))')
+        self.rel_basic_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?))(?P<following_char>\s|\.)')
+        self.rel_count_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_count)')
+        self.rel_list_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_list)')
 
 
     def port_templates(self):
@@ -221,9 +222,11 @@ class TemplateMonkey(object):
         match = self.extension_regex.search(line)
 
         if match:
-            # Note that we are fixing quotes as we go, just to be nice.
-            # Single quotes ('') will be replaced with double quotes ("").
-            line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
+            # Make sure the extension isn't already present.
+            if not self.extension_present_regex.match(line):
+                # Note that we are fixing quotes as we go, just to be nice.
+                # Single quotes ('') will be replaced with double quotes ("").
+                line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
 
         return line
 
@@ -255,7 +258,7 @@ class TemplateMonkey(object):
         match = self.file_field_regex.search(line)
 
         if match:
-            if not match.group('field') in self.ignored_methods:
+            if not match.group('full_match') in self.ignored_methods:
                 line = self.file_field_regex.sub('\g<prepend_char>\g<field>.\g<method>', line)
 
         return line
@@ -288,20 +291,20 @@ class TemplateMonkey(object):
         count_match = self.rel_count_regex.search(line)
 
         if count_match:
-            if not count_match.group('field') in self.ignored_methods:
+            if not count_match.group('full_match') in self.ignored_methods:
                 line = self.rel_count_regex.sub('\g<prepend_char>\g<field>.count', line)
 
         list_match = self.rel_list_regex.search(line)
 
         if list_match:
-            if not list_match.group('field') in self.ignored_methods:
+            if not list_match.group('full_match') in self.ignored_methods:
                 line = self.rel_list_regex.sub('\g<prepend_char>\g<field>.all', line)
 
         # Do the basic check last.
         basic_match = self.rel_basic_regex.search(line)
 
         if basic_match:
-            if not basic_match.group('field') in self.ignored_methods:
+            if not basic_match.group('full_match') in self.ignored_methods:
                 line = self.rel_basic_regex.sub('\g<prepend_char>\g<field>\g<following_char>', line)
 
         return line
@@ -327,6 +330,7 @@ class ReplacementTestCase(unittest.TestCase):
             'This is {{ model.get_myfield_width }}': 'This is {{ model.myfield.width }}',
             'This is {{ model.get_myfield_height }}': 'This is {{ model.myfield.height }}',
             'This is {{ model.get_myfield_filename }}': 'This is {{ model.myfield.filename }}',
+            'This is {{ model.get_absolute_url }}': 'This is {{ model.get_absolute_url }}',
         }
         self.sample_relations_templates = {
             'This is {{ model.get_myfield }}': 'This is {{ model.myfield }}',
@@ -334,6 +338,8 @@ class ReplacementTestCase(unittest.TestCase):
             'This is {{ model.get_myfield_list }}': 'This is {{ model.myfield.all }}',
         }
 
+        # Mock.
+        TemplateMonkey.create_template_paths = lambda self, x: []
         self.monkey = TemplateMonkey()
 
     def test_extensions(self):
