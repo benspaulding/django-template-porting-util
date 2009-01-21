@@ -38,38 +38,34 @@ class ReplacementTestCase(unittest.TestCase):
         desc = __doc__
 
         parser = OptionParser(usage=usage, description=desc)
-        options_array = [
-            ["-q", "--quiet", dict(
+        parser.add_option("-q", "--quiet",
                                     dest="verbosity", action="store_false",
-                                    help=u"output nothing to the console")],
-            ["-v", "--verbose", dict(
+                                    help=u"output nothing to the console")
+        parser.add_option("-v", "--verbose",
                                     dest="verbosity", action="store_true",
-                                    help=u"output all information to the console")],
-            ["-n", "--dry-run", dict(
+                                    help=u"output all information to the console")
+        parser.add_option("-n", "--dry-run",
                                     dest="dry_run", action="store_true",
-                                    help=u"run everything as normal but don’t save any changes")],
-            ["-x", "--add-extension", dict(
+                                    help=u"run everything as normal but don’t save any changes")
+        parser.add_option("-x", "--add-extension",
                                     dest="add_extension", action="store_true",
-                                    help=u"add extension “.html” to template references in {% extends %} and {% include %} tags")],
-            ["-f", "--update-file-fields", dict(
+                                    help=u"add extension “.html” to template references in {% extends %} and {% include %} tags")
+        parser.add_option("-f", "--update-file-fields",
                                     dest="update_file_fields", action="store_true",
-                                    help=u"update old file methods to new attributes, i.e. get_foo_url => foo.url, get_foo_size => foo.size, etc.")],
-            ["-r", "--update-relations", dict(
+                                    help=u"update old file methods to new attributes, i.e. get_foo_url => foo.url, get_foo_size => foo.size, etc.")
+        parser.add_option("-r", "--update-relations",
                                     dest="update_relations", action="store_true",
-                                    help=u"update old relation methods to new attributes, i.e. get_bar => bar, get_baz_list => baz_set.all, etc.")],
-            ["-s", "--settings", dict(
+                                    help=u"update old relation methods to new attributes, i.e. get_bar => bar, get_baz_list => baz_set.all, etc.")
+        parser.add_option("-s", "--settings",
                                     dest="settings", action="store", default=DJANGO_SETTINGS_MODULE,
-                                    help=u"use the given settings module (default to $DJANGO_SETTINGS_MODULE)", metavar="settings.module")],
-            ["-t", "--template-path", dict(
+                                    help=u"use the given settings module (default to $DJANGO_SETTINGS_MODULE)", metavar="settings.module")
+        parser.add_option("-t", "--template-path",
                                     dest="template_paths", action="append", default=[],
-                                    help=u"work on the given path (default to settings.TEMPLATE_DIRS)", metavar="/path/to/templates")],
-            ["-c", "--config-yaml", dict(
+                                    help=u"work on the given path (default to settings.TEMPLATE_DIRS)", metavar="/path/to/templates")
+        parser.add_option("-c", "--config-yaml",
                                     dest="config_path", action="store", default="config.yml", metavar="/path/to/file.yml",
-                                    help=u"use the specified YAML file for special-case exceptions. (default to config.yml)")],
-        ]
+                                    help=u"use the specified YAML file for special-case exceptions. (default to config.yml)")
 
-        for s, l, k in options_array:
-            parser.add_option(s, l, **k)
         options, args = parser.parse_args()
         
         # Mock. Grr.
