@@ -219,6 +219,8 @@ class TemplateMonkey(object):
         match = self.extension_regex.search(line)
 
         if match:
+            # Note that we are fixing quotes as we go, just to be nice.
+            # Single quotes ('') will be replaced with double quotes ("").
             line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
 
         return line
