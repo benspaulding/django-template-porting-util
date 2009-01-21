@@ -12,8 +12,10 @@ class ReplacementTestCase(unittest.TestCase):
         self.sample_extension_templates = {
             '{% extends "foo" %}': '{% extends "foo.html" %}',
             '{% extends \'foo\' %}{{ model.foo }}': '{% extends "foo.html" %}{{ model.foo }}',
+            '{% extends "foo.html" %}': '{% extends "foo.html" %}',
             '{% include "foo" %}': '{% include "foo.html" %}',
             '{% extends \'foo\' %}{{ model.foo }}': '{% extends "foo.html" %}{{ model.foo }}',
+            '{% include "foo.html" %}': '{% include "foo.html" %}',
         }
         self.sample_file_templates = {
             'This is {{ model.get_myfield_url }}': 'This is {{ model.myfield.url }}',
