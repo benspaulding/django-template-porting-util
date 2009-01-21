@@ -14,7 +14,7 @@ class ReplacementTestCase(unittest.TestCase):
             '{% extends \'foo\' %}{{ model.foo }}': '{% extends "foo.html" %}{{ model.foo }}',
             '{% extends "foo.html" %}': '{% extends "foo.html" %}',
             '{% include "foo" %}': '{% include "foo.html" %}',
-            '{% extends \'foo\' %}{{ model.foo }}': '{% extends "foo.html" %}{{ model.foo }}',
+            '{% include \'foo\' %}{{ model.foo }}': '{% include "foo.html" %}{{ model.foo }}',
             '{% include "foo.html" %}': '{% include "foo.html" %}',
         }
         self.sample_file_templates = {
