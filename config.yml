@@ -29,12 +29,12 @@ extensions:
 
 related_names:
 # It would be nice if the ``related_name`` attribute was accounted
-# for dynamically, but that is really, really complicated. So this
+# for dynamically, but that’s really, really complicated. So this
 # is the compromise.
 #
 # Any get_foo_list and get_foo_count methods will be replaced with
 # foo_set.all and foo_set.count, respectively, unless there is a
-# mapping below.
+# mapping below. Leave empty if your templates are newer than .91
     # Example,
     # - get_author: authors
     - get_staffmember: bylines
@@ -46,8 +46,8 @@ related_names:
 ignored_methods:
 # When updating file field syntax (via the -f or --update-file-fields
 # option) or relations (via the -r or --update-relations options) the
-# following methods will be left untouched (in addition to all model
-# methods found within settings.INSTALLED_APPS).
+# following methods will be left untouched, in addition to all model
+# methods found within settings.INSTALLED_APPS.
     # Django magic model methods.
       # http://docs.djangoproject.com/en/dev/ref/models/instances/#get-absolute-url
     - get_absolute_url
@@ -68,15 +68,17 @@ ignored_methods:
 
 
 force_update:
-# When updating relations (via the -r or --update-relations
-# options) methods listed below will be forced to a property,
+# When updating relations (via the -r or --update-relations options)
+# methods listed below will be forced to a property even if they are
+# actual model methods found via settings.INSTALLED_APPS,
 # i.e. object.get_foo ==> object.foo.
 #
 # This is valuable when the majority of ``get_foo`` references are
 # relations that need to be updated but there is an actual model
 # method called ``get_foo`` (and would thus normally be skipped)
 # that has minimal usage. This simply lets you choose which one
-# you want to correct by hand: the relation or the method.
+# you want to correct by hand: the relation or the method. Leave
+# empty if desired.
     # Example,
     # - get_foo
     # Weblogs methods that did not exist in Old Ellington.
