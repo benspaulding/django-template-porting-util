@@ -76,7 +76,7 @@ class TemplateMonkey(object):
         if not options.add_extension and \
            not options.update_file_fields and \
            not options.update_relations:
-            print u"This monkey won’t do anything unless you tell it to — see available options by running “port_templates.py --help”"
+            print u"This monkey won’t do anything unless you tell it to — see available options by running “port-templates.py --help”"
             sys.exit()
 
         for template_path in self.template_paths:
