@@ -9,8 +9,6 @@ template_paths:
     # Examples,
     # - /home/spud/templates
     # - /home/spud/foo/templates/base.html
-    - /Users/benspaulding/code/wol-templates/trunk/ellington_default/base.html
-    - /Users/benspaulding/code/wol-templates/trunk/ellington_mobile_default/events
 
 
 extensions:
