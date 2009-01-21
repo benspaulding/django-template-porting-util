@@ -9,7 +9,7 @@
 
     - Account for extensions list to avoid ``.html.html.html`` when re-run,
     - Account for the ``get_`` somehow (nothing is matching ignored_methods),
-    - Account for list_count_map when making list/count replacements
+    - Account for related_names when making list/count replacements
 
 - Ignore .* directories
 - Write more tests

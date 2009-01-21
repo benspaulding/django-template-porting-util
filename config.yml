@@ -27,7 +27,7 @@ extensions:
     - yaml
 
 
-list_count_map:
+related_names:
 # It would be nice if the ``related_name`` attribute was accounted
 # for dynamically, but that is really, really complicated. So this
 # is the compromise.

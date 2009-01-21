@@ -61,7 +61,7 @@ class TemplateMonkey(object):
         self.printer = PrettyPrinter(indent=2)
         config = self.load_config()
         self.extensions = config["extensions"]
-        self.list_count_map = config["list_count_map"]
+        self.related_names = config["related_names"]
         self.ignored_methods = config["ignored_methods"]
         self.template_paths = self.create_template_paths(config["template_paths"])
 
@@ -280,7 +280,7 @@ class TemplateMonkey(object):
            removed methods listed in force_update from ignored_methods).
 
         Note that ``foo_set`` all and count replacements can be customized
-        to account for related_name attributes via list_count_map.
+        to account for related_name attributes via related_names.
 
         """
         count_match = self.rel_count_regex.search(line)
