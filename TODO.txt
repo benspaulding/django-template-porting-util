@@ -6,3 +6,10 @@
 - Implement --verbose and --quiet options, along with standard printing,
 - Research and implement proper setup.py,
 - Implement that important bit, even the regular expression replacements. :)
+
+    - Account for extensions list to avoid ``.html.html.html`` when re-run,
+    - Account for the ``get_`` somehow (nothing is matching ignored_methods),
+    - Account for list_count_map when making list/count replacements
+
+- Ignore .* directories
+- Write more tests
