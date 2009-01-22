@@ -63,12 +63,12 @@ class TemplateMonkey(object):
         self.template_paths = config['template_paths']
 
         # Compile the regexen here for speed.
-        self.extension_regex = re.compile("{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)(\"|\')\s+%}")
-        self.extension_present_regex = re.compile("{%\s+(?P<tag>extends|include)\s+(\"|\')(?P<file_path>.*?)\.(" + "|".join(config['extensions']) + ")(\"|\')\s+%}")
-        self.file_field_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename))')
-        self.rel_basic_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?))(?P<following_char>\s|\.)')
-        self.rel_count_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_count)')
-        self.rel_list_regex = re.compile('(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_list)')
+        self.extension_regex = re.compile(r'{%\s+?(?P<tag>extends|include)\s+?(\"|\')(?P<file_path>.*?)(\"|\')\s+?%}')
+        self.extension_present_regex = re.compile(r'{%\s+?(?P<tag>extends|include)\s+?(\"|\')(?P<file_path>.*?)\.(' + '|'.join(config['extensions']) + r')(\"|\')\s+?%}')
+        self.file_field_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename))')
+        self.rel_basic_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?))(?P<following_char>\s|\.)')
+        self.rel_count_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_count)')
+        self.rel_list_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_list)')
 
 
     def port_templates(self):
@@ -223,7 +223,7 @@ class TemplateMonkey(object):
 
         if match:
             # Make sure the extension isn't already present.
-            if not self.extension_present_regex.match(line):
+            if not self.extension_present_regex.search(line):
                 # Note that we are fixing quotes as we go, just to be nice.
                 # Single quotes ('') will be replaced with double quotes ("").
                 line = self.extension_regex.sub('{% \g<tag> "\g<file_path>.html" %}', line)
@@ -323,6 +323,7 @@ class ReplacementTestCase(unittest.TestCase):
             '{% include "foo.html" %}': '{% include "foo.html" %}',
             '{% inclued "foo" %}': '{% inclued "foo" %}',
             '{% include foo %}': '{% include foo %}',
+            '    {% extends "foo.html" %}': '    {% extends "foo.html" %}',
         }
         self.sample_file_field_templates = {
             'This is {{ model.get_myfield_url }}': 'This is {{ model.myfield.url }}',
