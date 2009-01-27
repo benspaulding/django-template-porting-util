@@ -342,14 +342,21 @@ class ReplacementTestCase(unittest.TestCase):
             'This is {{ model.get_myfield_height }}': 'This is {{ model.myfield.height }}',
             'This is {{ model.get_myfield_filename }}': 'This is {{ model.myfield.filename }}',
             'This is {{ model.get_absolute_url }}': 'This is {{ model.get_absolute_url }}',
-            'This is {{ model.get_relation }}': 'This is {{ model.get_relation }}',
-            'This is {{ model.get_relation.get_absolute_url }}': 'This is {{ model.get_relation.get_absolute_url }}',
+            'This is {{ model.get_model }}': 'This is {{ model.get_model }}',
+            'This is {{ model.get_model.get_absolute_url }}': 'This is {{ model.get_model.get_absolute_url }}',
+            'This is {{ model.get_model.get_file_url }}': '{{ model.get_model.file.url }}',
+            'This is {{ chat.get_photo.get_photo_url }}': '{{ chat.get_photo.photo.url }}',
+            '{% mogrify model.get_thumbnail_photo_url thumbnail "200" %}': '{% mogrify model.thumbnail_photo.url thumbnail "200" %}'
         }
         self.sample_relations_templates = {
             'This is {{ model.get_myfield }}': 'This is {{ model.myfield }}',
             'This is {{ model.get_myfield_count }}': 'This is {{ model.myfield.count }}',
             'This is {{ model.get_myfield_list }}': 'This is {{ model.myfield.all }}',
             'This is {{ model.get_myfield.get_absolute_url }}': 'This is {{ model.myfield.get_absolute_url }}',
+            'This is {{ model.myfield.get_absolute_url }}': 'This is {{ model.myfield.get_absolute_url }}',
+            'This is {{ model.get_absolute_url }}': 'This is {{ model.get_absolute_url }}',
+            'This is {{ model.get_model.get_othermodel }}': 'This is {{ model.model.othermodel }}',
+            '{% mogrify model.get_thumbnail_photo_url thumbnail "200" %}': '{% mogrify model.get_thumbnail_photo_url thumbnail "200" %}'
         }
 
         # Mock.
