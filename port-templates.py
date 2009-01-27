@@ -333,7 +333,7 @@ class ReplacementTestCase(unittest.TestCase):
             ' {% include "foo.html" %}': ' {% include "foo.html" %}',
             '{% inclued "foo" %}': '{% inclued "foo" %}',
             '{% include foo %}': '{% include foo %}',
-            '    {% extends "foo.html" %}': '    {% extends "foo.html" %}',
+            '{% include "foo.txt" %}': '{% include "foo.txt" %}',
         }
         self.sample_file_field_templates = {
             'This is {{ model.get_myfield_url }}': 'This is {{ model.myfield.url }}',
@@ -342,11 +342,14 @@ class ReplacementTestCase(unittest.TestCase):
             'This is {{ model.get_myfield_height }}': 'This is {{ model.myfield.height }}',
             'This is {{ model.get_myfield_filename }}': 'This is {{ model.myfield.filename }}',
             'This is {{ model.get_absolute_url }}': 'This is {{ model.get_absolute_url }}',
+            'This is {{ model.get_relation }}': 'This is {{ model.get_relation }}',
+            'This is {{ model.get_relation.get_absolute_url }}': 'This is {{ model.get_relation.get_absolute_url }}',
         }
         self.sample_relations_templates = {
             'This is {{ model.get_myfield }}': 'This is {{ model.myfield }}',
             'This is {{ model.get_myfield_count }}': 'This is {{ model.myfield.count }}',
             'This is {{ model.get_myfield_list }}': 'This is {{ model.myfield.all }}',
+            'This is {{ model.get_myfield.get_absolute_url }}': 'This is {{ model.myfield.get_absolute_url }}',
         }
 
         # Mock.
