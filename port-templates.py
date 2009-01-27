@@ -58,7 +58,7 @@ class TemplateMonkey(object):
         self.printer = PrettyPrinter(indent=2)
         config = self.load_config()
         self.extensions = config['extensions']
-        self.related_names = config['related_names']
+        self.related_names = config['related_names'] + ["%s_count" % rn for rn in config['related_names']] + ["%s_list" % rn for rn in config['related_names']]
         self.ignored_methods = config['ignored_methods']
         self.template_paths = config['template_paths']
 
