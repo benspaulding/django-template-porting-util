@@ -185,7 +185,15 @@ class TemplateMonkey(object):
             # Generally directories will be given to us.
             if os.path.isdir(path):
                 for dirpath, dirnames, filenames in os.walk(path):
-                    # TODO: exclude .* directories.
+                    # Note that items must be removed from dirnames “in place” — which
+                    # means we can’t just do a dirnames.remove(dirname) in the first
+                    # loop. We have to generate the list and then remove them.
+                    dot_dirnames = []
+                    for dirname in dirnames:
+                        if dirname.startswith('.'):
+                            dot_dirnames.append(dirname)
+                    for dirname in dot_dirnames:
+                        dirnames.remove(dirname)
                     for filename in filenames:
                         if not filename.startswith('.'):
                             template_paths.append(os.path.join(dirpath, filename))
