@@ -65,10 +65,10 @@ class TemplateMonkey(object):
         # Compile the regexen here for speed.
         self.extension_regex = re.compile(r'{%\s+?(?P<tag>extends|include)\s+?(\"|\')(?P<file_path>.*?)(\"|\')\s+?%}')
         self.extension_present_regex = re.compile(r'{%\s+?(?P<tag>extends|include)\s+?(\"|\')(?P<file_path>.*?)\.(' + '|'.join(config['extensions']) + r')(\"|\')\s+?%}')
-        self.file_field_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_(?P<method>url|size|file|width|height|filename))')
-        self.rel_basic_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?))(?P<following_char>\s|\.)')
-        self.rel_count_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_count)')
-        self.rel_list_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>.*?)_list)')
+        self.file_field_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>[A-Za-z0-9_]*?)_(?P<method>url|size|file|width|height|filename))')
+        self.rel_basic_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>[A-Za-z0-9_]*?))(?P<following_char>\s|\.)')
+        self.rel_count_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>[A-Za-z0-9_]*?)_count)')
+        self.rel_list_regex = re.compile(r'(?P<prepend_char>\.|\"|\')(?P<full_match>get_(?P<field>[A-Za-z0-9_]*?)_list)')
 
 
     def port_templates(self):
@@ -299,20 +299,26 @@ class TemplateMonkey(object):
         count_match = self.rel_count_regex.search(line)
 
         if count_match:
-            if not count_match.group('full_match') in self.ignored_methods:
+            if count_match.group('full_match') in self.related_names:
+                line = self.rel_count_regex.sub('\g<prepend_char>%s.count' % self.related_names[count_match.group('full_match')], line)
+            elif not count_match.group('full_match') in self.ignored_methods:
                 line = self.rel_count_regex.sub('\g<prepend_char>\g<field>.count', line)
 
         list_match = self.rel_list_regex.search(line)
-
+        
         if list_match:
-            if not list_match.group('full_match') in self.ignored_methods:
+            if list_match.group('full_match') in self.related_names:
+                line = self.rel_list_regex.sub('\g<prepend_char>%s.count' % self.related_names[list_match.group('full_match')], line)
+            elif not list_match.group('full_match') in self.ignored_methods:
                 line = self.rel_list_regex.sub('\g<prepend_char>\g<field>.all', line)
 
         # Do the basic check last.
         basic_match = self.rel_basic_regex.search(line)
 
         if basic_match:
-            if not basic_match.group('full_match') in self.ignored_methods:
+            if basic_match.group('full_match') in self.related_names:
+                line = self.rel_basic_regex.sub('\g<prepend_char>%s.count' % self.related_names[basic_match.group('full_match')], line)
+            elif not basic_match.group('full_match') in self.ignored_methods:
                 line = self.rel_basic_regex.sub('\g<prepend_char>\g<field>\g<following_char>', line)
 
         return line
@@ -342,14 +348,15 @@ class ReplacementTestCase(unittest.TestCase):
             'This is {{ model.get_myfield_height }}': 'This is {{ model.myfield.height }}',
             'This is {{ model.get_myfield_filename }}': 'This is {{ model.myfield.filename }}',
             'This is {{ model.get_absolute_url }}': 'This is {{ model.get_absolute_url }}',
-            'This is {{ model.get_relation }}': 'This is {{ model.get_relation }}',
-            'This is {{ model.get_relation.get_absolute_url }}': 'This is {{ model.get_relation.get_absolute_url }}',
         }
         self.sample_relations_templates = {
             'This is {{ model.get_myfield }}': 'This is {{ model.myfield }}',
             'This is {{ model.get_myfield_count }}': 'This is {{ model.myfield.count }}',
             'This is {{ model.get_myfield_list }}': 'This is {{ model.myfield.all }}',
-            'This is {{ model.get_myfield.get_absolute_url }}': 'This is {{ model.myfield.get_absolute_url }}',
+            'This is {{ model.get_staffmember_list }}': 'This is {{ model.bylines.all }}',
+            'This is {{ model.get_choice_count }}': 'This is {{ model.choices.count }}',
+            'This is {{ model.get_weblogs_blog_list }}': 'This is {{ model.blogs.all }}',
+            'This is {{ model.get_blog_count }}': 'This is {{ model.entries.count }}',
         }
 
         # Mock.
@@ -357,14 +364,29 @@ class ReplacementTestCase(unittest.TestCase):
         self.monkey = TemplateMonkey()
 
     def test_extensions(self):
+        if not options.add_extension:
+            return
+        
         for old_template, new_template in self.sample_extension_templates.items():
             self.assertEqual(self.monkey.add_extension(old_template), new_template)
 
     def test_file_fields(self):
+        if not options.update_file_fields:
+            return
+        
+        if options.update_file_fields and not options.update_relations:
+            self.sample_file_field_templates.update({
+                'This is {{ model.get_relation }}': 'This is {{ model.get_relation }}',
+                'This is {{ model.get_relation.get_absolute_url }}': 'This is {{ model.get_relation.get_absolute_url }}',
+            })
+        
         for old_template, new_template in self.sample_file_field_templates.items():
             self.assertEqual(self.monkey.update_file_fields(old_template), new_template)
 
     def test_relations(self):
+        if not options.update_relations:
+            return
+        
         for old_template, new_template in self.sample_relations_templates.items():
             self.assertEqual(self.monkey.update_relations(old_template), new_template)
 
