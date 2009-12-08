@@ -2,6 +2,9 @@
  TODO
 ======
 
+These are all good ideas that would make the script safer and more useful,
+but let's be realistic: I will never get to them.
+
 - Implement --dry-run option,
 - Implement --verbose and --quiet options, along with standard printing,
 - Add a an --in-place option (with a prompt) and make copying the

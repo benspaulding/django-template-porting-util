@@ -11,7 +11,9 @@ and subject to change. Just put any new templates in the template directory and
 re-run. Remember that you can also point to a specific directory, or even a
 specific template.
 
-WARNING: This program irreversibly alters your templates! It is essential that
+Warning
+-------
+This program irreversibly alters your templates! It is essential that
 you use some form of version control or at least make backups of your files
 before every use.
 
