@@ -60,6 +60,7 @@ ignored_methods:
     - get_next_in_order
     - get_previous_in_order
     # Old skool comments methods. Leave these alone just to be tidy.
+    - get_crossdomain_url
     - get_deletion_url
     - get_flag_url
     - get_good_karma_total
