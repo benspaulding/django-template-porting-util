@@ -22,3 +22,15 @@ Requirements
 
 * Python 2.5 or 2.6
 * Django 1.0 or later
+
+Credits
+-------
+
+This script grew out a script by `Christian Metts <http://mintchaos.com/>`_,
+which itself was a modified version of a script by
+`Jacob Kaplan-Moss <http://jacobian.org/>`_.
+
+Further, this would not exist with out the help of
+`Daniel Lindsley <http://toastdriven.com/>`_.
+
+Much of the good in this utility is their fault. All of the bad is mine. :)
