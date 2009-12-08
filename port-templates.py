@@ -38,10 +38,14 @@ try:
     from django.template import BLOCK_TAG_START, BLOCK_TAG_END
     from django.template import VARIABLE_TAG_START, VARIABLE_TAG_END
     from django.template import COMMENT_TAG_START, COMMENT_TAG_END
-    DJANGO_SETTINGS_MODULE = os.environ['DJANGO_SETTINGS_MODULE']
 except (ImportError, KeyError):
-    print u"Cannot find Django. Did you setup your environment correctly? (Don’t forget to set the DJANGO_SETTINGS_MODULE environment variable.)"
+    print u"Cannot find Django. Did you setup your environment correctly?"
     sys.exit()
+
+try:
+    DJANGO_SETTINGS_MODULE = os.environ['DJANGO_SETTINGS_MODULE']
+except:
+    DJANGO_SETTINGS_MODULE = None
 
 
 class TemplateMonkey(object):
