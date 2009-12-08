@@ -21,7 +21,7 @@ from __future__ import with_statement
 
 __author__ = "Ben Spaulding"
 __contributors__ = ["Daniel Lindsley",]
-__copyright__ = "Copyright (c) 2008, Ben Spaulding. All rights reserved."
+__copyright__ = "Copyright (c) 2009, Ben Spaulding. All rights reserved."
 __description__ = "Update Django template syntax from .9x to 1.0."
 __url__ = "http://github.com/benspaulding/django-template-porting-util"
 __version__ = "0.9"
